@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Total Cost Theory Simulator 📊</title>
+    <title>Total Cost Theory Master 📊</title>
     <style>
         :root {
             --primary: #3b82f6;
@@ -20,7 +20,7 @@
             background-color: var(--bg-color);
             color: #f8fafc;
             margin: 0;
-            padding: 20px;
+            padding: 15px;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -34,7 +34,7 @@
             max-width: 900px;
             border-radius: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.5);
-            padding: 30px;
+            padding: 25px;
             border: 2px solid #334155;
             position: relative;
         }
@@ -45,11 +45,11 @@
             align-items: center;
             border-bottom: 2px solid #334155;
             padding-bottom: 15px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 800;
             color: #60a5fa;
             display: flex;
@@ -70,29 +70,83 @@
             background: #0f172a;
             border-left: 4px solid var(--primary);
             padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 25px;
-            font-size: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
             line-height: 1.6;
+        }
+
+        .legend-box {
+            display: flex;
+            gap: 15px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #1e293b;
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .totals-summary {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .summary-card {
+            background: #0f172a;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #334155;
+            text-align: center;
+        }
+
+        .summary-card.product {
+            border-color: var(--success);
+        }
+
+        .summary-card.period {
+            border-color: var(--accent);
+        }
+
+        .summary-card h4 {
+            margin: 0 0 5px 0;
+            font-size: 14px;
+            color: #94a3b8;
+        }
+
+        .summary-card .val {
+            font-size: 22px;
+            font-weight: 800;
         }
 
         .data-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 12px;
-            margin-bottom: 25px;
+            margin-bottom: 20px;
         }
 
         .cost-item {
             background: #0f172a;
             border: 2px solid #475569;
-            padding: 12px 16px;
+            padding: 14px;
             border-radius: 12px;
             cursor: pointer;
             transition: all 0.2s;
             display: flex;
             justify-content: space-between;
+            align-items: center;
             font-weight: 600;
+            position: relative;
         }
 
         .cost-item:hover {
@@ -108,6 +162,30 @@
         .cost-item.selected-period {
             border-color: var(--accent);
             background: rgba(245, 158, 11, 0.15);
+        }
+
+        .badge-tag {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            text-transform: uppercase;
+        }
+
+        .badge-product { background: var(--success); color: #000; }
+        .badge-period { background: var(--accent); color: #000; }
+
+        .notice-banner {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px dashed var(--accent);
+            color: #fde68a;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         .stage-container {
@@ -159,6 +237,26 @@
             filter: brightness(1.1);
         }
 
+        .btn-back {
+            background: #334155;
+            color: #f8fafc;
+            border: none;
+            padding: 10px 18px;
+            font-size: 14px;
+            font-weight: 700;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 15px;
+            transition: all 0.2s;
+        }
+
+        .btn-back:hover {
+            background: #475569;
+        }
+
         .feedback-box {
             margin-top: 15px;
             padding: 12px;
@@ -177,23 +275,6 @@
             background: rgba(239, 68, 68, 0.2);
             color: #fca5a5;
             border: 1px solid var(--error);
-        }
-
-        .statement-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 15px;
-        }
-
-        .statement-table th, .statement-table td {
-            border: 1px solid #334155;
-            padding: 10px 14px;
-            text-align: left;
-        }
-
-        .statement-table th {
-            background: #1e293b;
-            color: #93c5fd;
         }
 
         .overlay {
@@ -222,25 +303,54 @@
     <!-- Step 1: Classification -->
     <div id="step1">
         <div class="instructions">
-            📌 <b>Step 1: Classification</b><br>
-            Click each cost item to assign it as either <b>Product Cost</b> (Production) or <b>Period Cost</b> (Marketing/Admin).
+            📌 <b>Step 1: Classification Rules</b>
+            <div class="legend-box">
+                <div class="legend-item" style="border: 1px solid var(--success);">
+                    <span style="color: var(--success);">1 Click 🖱️</span> = Product Cost (📦)
+                </div>
+                <div class="legend-item" style="border: 1px solid var(--accent);">
+                    <span style="color: var(--accent);">2 Clicks 🖱️🖱️</span> = Period Cost (⏱️)
+                </div>
+                <div class="legend-item" style="border: 1px solid #64748b;">
+                    <span>3 Clicks</span> = Unselect ⚪
+                </div>
+            </div>
+        </div>
+
+        <!-- Calculated Totals Box -->
+        <div class="totals-summary">
+            <div class="summary-card product">
+                <h4>Total Product Cost (📦)</h4>
+                <div class="val" id="totalProductVal" style="color: var(--success);">0 EGP</div>
+            </div>
+            <div class="summary-card period">
+                <h4>Total Period Cost (⏱️)</h4>
+                <div class="val" id="totalPeriodVal" style="color: var(--accent);">0 EGP</div>
+            </div>
         </div>
 
         <div class="data-grid" id="costItemsGrid"></div>
 
-        <button class="btn-submit" onclick="validateClassification()">Verify Classification ➔</button>
+        <div class="notice-banner">
+            ⚠️ <b>Important Note:</b> Pay close attention to the Total Product Cost and Total Period Cost calculated above! You will need these figures to solve Screen 2.
+        </div>
+
+        <button class="btn-submit" onclick="validateClassification()">Verify Classification & Proceed ➔</button>
         <div class="feedback-box" id="step1Feedback"></div>
     </div>
 
     <!-- Step 2: Calculations -->
     <div id="step2" style="display: none;">
+        <button class="btn-back" onclick="goToStep1()">⬅️ Back to Screen 1</button>
+
         <div class="instructions">
-            📊 <b>Data Context:</b> Units Produced = 10,000 | Units Sold = 8,000 | Selling Price = EGP 15/unit.
+            📊 <b>Production Context:</b><br>
+            Units Produced = <b>10,000</b> | Units Sold = <b>8,000</b> | Selling Price = <b>EGP 15 / unit</b>
         </div>
 
         <div class="stage-container">
             <h3>1. Total Production Cost (تكلفة الإنتاج)</h3>
-            <p>Sum of all Product Costs (DM + DL + D.OH + In.OH):</p>
+            <p>Enter the Total Product Cost calculated in Screen 1:</p>
             <div class="input-group">
                 <input type="number" id="calcProductionCost" placeholder="EGP Amount">
                 <button class="btn-submit" onclick="checkProductionCost()">Check</button>
@@ -249,8 +359,8 @@
         </div>
 
         <div class="stage-container" id="unitCostStage" style="display: none;">
-            <h3>2. Cost Per Unit & Cost of Goods Sold (COGS)</h3>
-            <p>Calculate Cost per Unit (Total Cost ÷ 10,000) and COGS (8,000 units × Unit Cost):</p>
+            <h3>2. Unit Cost & COGS</h3>
+            <p>Calculate Cost per Unit (Total ÷ 10,000) and COGS (8,000 units × Unit Cost):</p>
             <div class="input-group">
                 <input type="number" id="calcUnitCost" placeholder="Unit Cost (EGP)">
                 <input type="number" id="calcCOGS" placeholder="COGS (EGP)">
@@ -272,9 +382,9 @@
 
     <!-- Final Overlay -->
     <div class="overlay" id="finalOverlay" style="display: none;">
-        <h1 style="font-size: 32px; color: #10b981; margin-bottom: 10px;">🎉 Congratulations!</h1>
+        <h1 style="font-size: 32px; color: #10b981; margin-bottom: 10px;">🎉 Outstanding Job!</h1>
         <p style="font-size: 18px; color: #cbd5e1; max-width: 500px; line-height: 1.6;">
-            You have successfully prepared the Production Cost Statement and Income Statement using the <b>Total Cost Theory</b>!
+            You have mastered the <b>Theory of Total Cost</b> classification and calculations!
         </p>
         <div style="font-size: 24px; font-weight: bold; color: var(--accent); margin: 20px 0;" id="finalScore"></div>
         <button class="btn-submit" onclick="location.reload()">Play Again 🔄</button>
@@ -328,24 +438,65 @@
             const el = document.createElement('div');
             el.className = 'cost-item';
             el.id = `item-${item.id}`;
-            el.innerHTML = `<span>${item.name}</span> <span>${item.amount.toLocaleString()} EGP</span>`;
-            el.onclick = () => toggleClassification(item.id);
+            el.onclick = () => handleItemClick(item.id);
             grid.appendChild(el);
+            updateItemDisplay(item.id);
         });
+        updateTotals();
     }
 
-    function toggleClassification(id) {
-        const el = document.getElementById(`item-${id}`);
+    function handleItemClick(id) {
         if (!userClassifications[id]) {
             userClassifications[id] = 'product';
-            el.className = 'cost-item selected-product';
         } else if (userClassifications[id] === 'product') {
             userClassifications[id] = 'period';
-            el.className = 'cost-item selected-period';
         } else {
             delete userClassifications[id];
-            el.className = 'cost-item';
         }
+        updateItemDisplay(id);
+        updateTotals();
+    }
+
+    function updateItemDisplay(id) {
+        const item = rawCosts.find(c => c.id === id);
+        const el = document.getElementById(`item-${id}`);
+        const status = userClassifications[id];
+
+        let tagHTML = '';
+        if (status === 'product') {
+            el.className = 'cost-item selected-product';
+            tagHTML = `<span class="badge-tag badge-product">Product</span>`;
+        } else if (status === 'period') {
+            el.className = 'cost-item selected-period';
+            tagHTML = `<span class="badge-tag badge-period">Period</span>`;
+        } else {
+            el.className = 'cost-item';
+            tagHTML = `<span style="font-size:12px; color:#64748b;">Unselected</span>`;
+        }
+
+        el.innerHTML = `
+            <div>
+                <div>${item.name}</div>
+                <div style="font-size: 13px; color: #94a3b8;">${item.amount.toLocaleString()} EGP</div>
+            </div>
+            ${tagHTML}
+        `;
+    }
+
+    function updateTotals() {
+        let productSum = 0;
+        let periodSum = 0;
+
+        rawCosts.forEach(item => {
+            if (userClassifications[item.id] === 'product') {
+                productSum += item.amount;
+            } else if (userClassifications[item.id] === 'period') {
+                periodSum += item.amount;
+            }
+        });
+
+        document.getElementById('totalProductVal').textContent = `${productSum.toLocaleString()} EGP`;
+        document.getElementById('totalPeriodVal').textContent = `${periodSum.toLocaleString()} EGP`;
     }
 
     function validateClassification() {
@@ -361,19 +512,24 @@
 
         if (correctCount === rawCosts.length) {
             playSound('correct');
-            totalScore += 40;
+            totalScore = 40;
             document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
             feedback.className = 'feedback-box correct';
-            feedback.innerHTML = '✅ Excellent! All costs correctly classified into Product Costs and Period Costs.';
+            feedback.innerHTML = '✅ All items correctly classified! Moving to calculations...';
             setTimeout(() => {
                 document.getElementById('step1').style.display = 'none';
                 document.getElementById('step2').style.display = 'block';
-            }, 1200);
+            }, 1000);
         } else {
             playSound('wrong');
             feedback.className = 'feedback-box incorrect';
-            feedback.innerHTML = `❌ You got ${correctCount} out of ${rawCosts.length} correct. Remember: Production costs = Product Costs, Marketing & Admin = Period Costs. Click items again to adjust!`;
+            feedback.innerHTML = `❌ You got ${correctCount} out of ${rawCosts.length} correct. Remember: 1 Click = Product, 2 Clicks = Period. Please adjust!`;
         }
+    }
+
+    function goToStep1() {
+        document.getElementById('step2').style.display = 'none';
+        document.getElementById('step1').style.display = 'block';
     }
 
     function checkProductionCost() {
@@ -383,15 +539,13 @@
 
         if (val === 80000) {
             playSound('correct');
-            totalScore += 20;
-            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
             fb.className = 'feedback-box correct';
-            fb.innerHTML = '✅ Correct! Total Production Cost = 30,000 + 15,000 + 5,000 + 10,000 + 20,000 = 80,000 EGP.';
+            fb.innerHTML = '✅ Correct! Total Production Cost = 80,000 EGP.';
             document.getElementById('unitCostStage').style.display = 'block';
         } else {
             playSound('wrong');
             fb.className = 'feedback-box incorrect';
-            fb.innerHTML = '❌ Incorrect. Sum all 5 product costs together.';
+            fb.innerHTML = '❌ Incorrect. Check Total Product Cost from Screen 1.';
         }
     }
 
@@ -403,15 +557,13 @@
 
         if (unit === 8 && cogs === 64000) {
             playSound('correct');
-            totalScore += 20;
-            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
             fb.className = 'feedback-box correct';
-            fb.innerHTML = '✅ Correct! Unit Cost = 80,000 / 10,000 = 8 EGP. COGS = 8,000 × 8 = 64,000 EGP.';
+            fb.innerHTML = '✅ Correct! Unit Cost = 8 EGP, COGS = 64,000 EGP.';
             document.getElementById('incomeStage').style.display = 'block';
         } else {
             playSound('wrong');
             fb.className = 'feedback-box incorrect';
-            fb.innerHTML = '❌ Hint: Unit cost = Total / 10,000 units. COGS = Unit cost × 8,000 units.';
+            fb.innerHTML = '❌ Unit Cost = 80,000 ÷ 10,000 = 8 EGP. COGS = 8 × 8,000 = 64,000 EGP.';
         }
     }
 
@@ -422,18 +574,18 @@
 
         if (net === 26000) {
             playSound('correct');
-            totalScore += 20;
+            totalScore = 100;
             document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
             fb.className = 'feedback-box correct';
-            fb.innerHTML = '✅ Outstanding! Net Income = 120,000 Sales - 64,000 COGS - 30,000 Period Costs = 26,000 EGP.';
+            fb.innerHTML = '✅ Perfect! Net Income = 26,000 EGP.';
             setTimeout(() => {
                 document.getElementById('finalOverlay').style.display = 'flex';
                 document.getElementById('finalScore').textContent = `Final Score: ${totalScore} / 100`;
-            }, 1200);
+            }, 1000);
         } else {
             playSound('wrong');
             fb.className = 'feedback-box incorrect';
-            fb.innerHTML = '❌ Hint: Sales = 120,000. Gross Profit = 120,000 - 64,000 = 56,000. Net Income = 56,000 - 30,000 Period Costs.';
+            fb.innerHTML = '❌ Net Income = Sales (120,000) - COGS (64,000) - Period Costs (30,000) = 26,000 EGP.';
         }
     }
 
