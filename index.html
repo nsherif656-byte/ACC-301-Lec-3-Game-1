@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Total Cost Theory Simulator 📊</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --secondary: #8b5cf6;
+            --success: #10b981;
+            --error: #ef4444;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #f59e0b;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .game-card {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 900px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            padding: 30px;
+            border: 2px solid #334155;
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-bottom: 25px;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 800;
+            color: #60a5fa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stat-badge {
+            background: #334155;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 700;
+            font-size: 15px;
+            color: var(--accent);
+        }
+
+        .instructions {
+            background: #0f172a;
+            border-left: 4px solid var(--primary);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+            font-size: 15px;
+            line-height: 1.6;
+        }
+
+        .data-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .cost-item {
+            background: #0f172a;
+            border: 2px solid #475569;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            justify-content: space-between;
+            font-weight: 600;
+        }
+
+        .cost-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .cost-item.selected-product {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.15);
+        }
+
+        .cost-item.selected-period {
+            border-color: var(--accent);
+            background: rgba(245, 158, 11, 0.15);
+        }
+
+        .stage-container {
+            background: #0f172a;
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid #334155;
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        input[type="number"] {
+            background: #1e293b;
+            border: 2px solid #475569;
+            color: #fff;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 160px;
+            outline: none;
+        }
+
+        input[type="number"]:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+
+        .feedback-box {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            display: none;
+        }
+
+        .feedback-box.correct {
+            background: rgba(16, 185, 129, 0.2);
+            color: #a7f3d0;
+            border: 1px solid var(--success);
+        }
+
+        .feedback-box.incorrect {
+            background: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+            border: 1px solid var(--error);
+        }
+
+        .statement-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .statement-table th, .statement-table td {
+            border: 1px solid #334155;
+            padding: 10px 14px;
+            text-align: left;
+        }
+
+        .statement-table th {
+            background: #1e293b;
+            color: #93c5fd;
+        }
+
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(15, 23, 42, 0.95);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 30px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="game-card">
+    <div class="header">
+        <div class="title">📈 Total Cost Theory Master</div>
+        <div class="stat-badge" id="scoreDisplay">Score: 0 / 100</div>
+    </div>
+
+    <!-- Step 1: Classification -->
+    <div id="step1">
+        <div class="instructions">
+            📌 <b>Step 1: Classification</b><br>
+            Click each cost item to assign it as either <b>Product Cost</b> (Production) or <b>Period Cost</b> (Marketing/Admin).
+        </div>
+
+        <div class="data-grid" id="costItemsGrid"></div>
+
+        <button class="btn-submit" onclick="validateClassification()">Verify Classification ➔</button>
+        <div class="feedback-box" id="step1Feedback"></div>
+    </div>
+
+    <!-- Step 2: Calculations -->
+    <div id="step2" style="display: none;">
+        <div class="instructions">
+            📊 <b>Data Context:</b> Units Produced = 10,000 | Units Sold = 8,000 | Selling Price = EGP 15/unit.
+        </div>
+
+        <div class="stage-container">
+            <h3>1. Total Production Cost (تكلفة الإنتاج)</h3>
+            <p>Sum of all Product Costs (DM + DL + D.OH + In.OH):</p>
+            <div class="input-group">
+                <input type="number" id="calcProductionCost" placeholder="EGP Amount">
+                <button class="btn-submit" onclick="checkProductionCost()">Check</button>
+            </div>
+            <div class="feedback-box" id="prodFeedback"></div>
+        </div>
+
+        <div class="stage-container" id="unitCostStage" style="display: none;">
+            <h3>2. Cost Per Unit & Cost of Goods Sold (COGS)</h3>
+            <p>Calculate Cost per Unit (Total Cost ÷ 10,000) and COGS (8,000 units × Unit Cost):</p>
+            <div class="input-group">
+                <input type="number" id="calcUnitCost" placeholder="Unit Cost (EGP)">
+                <input type="number" id="calcCOGS" placeholder="COGS (EGP)">
+                <button class="btn-submit" onclick="checkCOGS()">Check</button>
+            </div>
+            <div class="feedback-box" id="cogsFeedback"></div>
+        </div>
+
+        <div class="stage-container" id="incomeStage" style="display: none;">
+            <h3>3. Income Statement Final Result</h3>
+            <p>Calculate Net Income (Sales Revenue - COGS - Period Costs):</p>
+            <div class="input-group">
+                <input type="number" id="calcNetIncome" placeholder="Net Income (EGP)">
+                <button class="btn-submit" onclick="checkNetIncome()">Check</button>
+            </div>
+            <div class="feedback-box" id="incomeFeedback"></div>
+        </div>
+    </div>
+
+    <!-- Final Overlay -->
+    <div class="overlay" id="finalOverlay" style="display: none;">
+        <h1 style="font-size: 32px; color: #10b981; margin-bottom: 10px;">🎉 Congratulations!</h1>
+        <p style="font-size: 18px; color: #cbd5e1; max-width: 500px; line-height: 1.6;">
+            You have successfully prepared the Production Cost Statement and Income Statement using the <b>Total Cost Theory</b>!
+        </p>
+        <div style="font-size: 24px; font-weight: bold; color: var(--accent); margin: 20px 0;" id="finalScore"></div>
+        <button class="btn-submit" onclick="location.reload()">Play Again 🔄</button>
+    </div>
+</div>
+
+<script>
+    const rawCosts = [
+        { id: 1, name: "Direct Materials", amount: 30000, type: "product" },
+        { id: 2, name: "Direct Wages", amount: 15000, type: "product" },
+        { id: 3, name: "Direct Production Services", amount: 5000, type: "product" },
+        { id: 4, name: "Indirect Variable Prod. Costs", amount: 10000, type: "product" },
+        { id: 5, name: "Indirect Fixed Prod. Costs", amount: 20000, type: "product" },
+        { id: 6, name: "Marketing Costs", amount: 12000, type: "period" },
+        { id: 7, name: "Admin & Financial Costs", amount: 18000, type: "period" }
+    ];
+
+    let userClassifications = {};
+    let totalScore = 0;
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime);
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+        } else {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(180, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.12, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.25);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.25);
+        }
+    }
+
+    function initGame() {
+        const grid = document.getElementById('costItemsGrid');
+        grid.innerHTML = '';
+        rawCosts.forEach(item => {
+            const el = document.createElement('div');
+            el.className = 'cost-item';
+            el.id = `item-${item.id}`;
+            el.innerHTML = `<span>${item.name}</span> <span>${item.amount.toLocaleString()} EGP</span>`;
+            el.onclick = () => toggleClassification(item.id);
+            grid.appendChild(el);
+        });
+    }
+
+    function toggleClassification(id) {
+        const el = document.getElementById(`item-${id}`);
+        if (!userClassifications[id]) {
+            userClassifications[id] = 'product';
+            el.className = 'cost-item selected-product';
+        } else if (userClassifications[id] === 'product') {
+            userClassifications[id] = 'period';
+            el.className = 'cost-item selected-period';
+        } else {
+            delete userClassifications[id];
+            el.className = 'cost-item';
+        }
+    }
+
+    function validateClassification() {
+        let correctCount = 0;
+        rawCosts.forEach(item => {
+            if (userClassifications[item.id] === item.type) {
+                correctCount++;
+            }
+        });
+
+        const feedback = document.getElementById('step1Feedback');
+        feedback.style.display = 'block';
+
+        if (correctCount === rawCosts.length) {
+            playSound('correct');
+            totalScore += 40;
+            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
+            feedback.className = 'feedback-box correct';
+            feedback.innerHTML = '✅ Excellent! All costs correctly classified into Product Costs and Period Costs.';
+            setTimeout(() => {
+                document.getElementById('step1').style.display = 'none';
+                document.getElementById('step2').style.display = 'block';
+            }, 1200);
+        } else {
+            playSound('wrong');
+            feedback.className = 'feedback-box incorrect';
+            feedback.innerHTML = `❌ You got ${correctCount} out of ${rawCosts.length} correct. Remember: Production costs = Product Costs, Marketing & Admin = Period Costs. Click items again to adjust!`;
+        }
+    }
+
+    function checkProductionCost() {
+        const val = parseFloat(document.getElementById('calcProductionCost').value);
+        const fb = document.getElementById('prodFeedback');
+        fb.style.display = 'block';
+
+        if (val === 80000) {
+            playSound('correct');
+            totalScore += 20;
+            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
+            fb.className = 'feedback-box correct';
+            fb.innerHTML = '✅ Correct! Total Production Cost = 30,000 + 15,000 + 5,000 + 10,000 + 20,000 = 80,000 EGP.';
+            document.getElementById('unitCostStage').style.display = 'block';
+        } else {
+            playSound('wrong');
+            fb.className = 'feedback-box incorrect';
+            fb.innerHTML = '❌ Incorrect. Sum all 5 product costs together.';
+        }
+    }
+
+    function checkCOGS() {
+        const unit = parseFloat(document.getElementById('calcUnitCost').value);
+        const cogs = parseFloat(document.getElementById('calcCOGS').value);
+        const fb = document.getElementById('cogsFeedback');
+        fb.style.display = 'block';
+
+        if (unit === 8 && cogs === 64000) {
+            playSound('correct');
+            totalScore += 20;
+            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
+            fb.className = 'feedback-box correct';
+            fb.innerHTML = '✅ Correct! Unit Cost = 80,000 / 10,000 = 8 EGP. COGS = 8,000 × 8 = 64,000 EGP.';
+            document.getElementById('incomeStage').style.display = 'block';
+        } else {
+            playSound('wrong');
+            fb.className = 'feedback-box incorrect';
+            fb.innerHTML = '❌ Hint: Unit cost = Total / 10,000 units. COGS = Unit cost × 8,000 units.';
+        }
+    }
+
+    function checkNetIncome() {
+        const net = parseFloat(document.getElementById('calcNetIncome').value);
+        const fb = document.getElementById('incomeFeedback');
+        fb.style.display = 'block';
+
+        if (net === 26000) {
+            playSound('correct');
+            totalScore += 20;
+            document.getElementById('scoreDisplay').textContent = `Score: ${totalScore} / 100`;
+            fb.className = 'feedback-box correct';
+            fb.innerHTML = '✅ Outstanding! Net Income = 120,000 Sales - 64,000 COGS - 30,000 Period Costs = 26,000 EGP.';
+            setTimeout(() => {
+                document.getElementById('finalOverlay').style.display = 'flex';
+                document.getElementById('finalScore').textContent = `Final Score: ${totalScore} / 100`;
+            }, 1200);
+        } else {
+            playSound('wrong');
+            fb.className = 'feedback-box incorrect';
+            fb.innerHTML = '❌ Hint: Sales = 120,000. Gross Profit = 120,000 - 64,000 = 56,000. Net Income = 56,000 - 30,000 Period Costs.';
+        }
+    }
+
+    window.onload = initGame;
+</script>
+
+</body>
+</html>
